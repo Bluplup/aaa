@@ -25,10 +25,18 @@ SETTINGS = {
 
 # ================= PANEL MODAL =================
 class PanelModal(discord.ui.Modal, title="Ticket Panel & Kurulum Ayarları"):
-    panel_title_input = discord.ui.TextInput(label="Panel Başlığı", max_length=100, required=True, default=SETTINGS["panel_title"])
-    panel_desc_input = discord.ui.TextInput(label="Panel Açıklaması", style=discord.TextStyle.paragraph, required=True, default=SETTINGS["panel_desc"])
-    category_id_input = discord.ui.TextInput(label="Kategori ID", style=discord.TextStyle.short, required=True, placeholder="123456789012345678")
-    log_id_input = discord.ui.TextInput(label="Log Kanal ID", style=discord.TextStyle.short, required=True, placeholder="123456789012345678")
+    panel_title_input = discord.ui.TextInput(
+        label="Panel Başlığı", max_length=100, required=True, default=SETTINGS["panel_title"]
+    )
+    panel_desc_input = discord.ui.TextInput(
+        label="Panel Açıklaması", style=discord.TextStyle.paragraph, required=True, default=SETTINGS["panel_desc"]
+    )
+    category_id_input = discord.ui.TextInput(
+        label="Kategori ID", style=discord.TextStyle.short, required=True, placeholder="123456789012345678"
+    )
+    log_id_input = discord.ui.TextInput(
+        label="Log Kanal ID", style=discord.TextStyle.short, required=True, placeholder="123456789012345678"
+    )
 
     async def on_submit(self, interaction: discord.Interaction):
         SETTINGS["panel_title"] = self.panel_title_input.value
