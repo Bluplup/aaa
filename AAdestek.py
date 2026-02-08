@@ -129,12 +129,14 @@ class TicketView(discord.ui.View):
 class CategorySelect(discord.ui.Select):
 
     def __init__(self, guild):
-        super().__init__(placeholder="📂 Ticket kategorisi",
-                         options=[
-                             discord.SelectOption(label=c.name,
-                                                  value=str(c.id))
-                             for c in guild.categories
-                         ])
+        super().__init__(
+            placeholder="📂 Ticket kategorisi",
+            options=[
+                discord.SelectOption(label=c.name, value=str(c.id))
+                for c in guild.categories[:25]
+            ]
+        )
+
 
     async def callback(self, interaction: discord.Interaction):
         SETTINGS["category"] = int(self.values[0])
@@ -144,12 +146,13 @@ class CategorySelect(discord.ui.Select):
 class LogSelect(discord.ui.Select):
 
     def __init__(self, guild):
-        super().__init__(placeholder="📜 Log kanalı",
-                         options=[
-                             discord.SelectOption(label=c.name,
-                                                  value=str(c.id))
-                             for c in guild.text_channels
-                         ])
+        super().__init__(
+            placeholder="📜 Log kanalı",
+            options=[
+                discord.SelectOption(label=c.name, value=str(c.id))
+                for c in guild.text_channels[:25]
+            ]
+        )
 
     async def callback(self, interaction: discord.Interaction):
         SETTINGS["log"] = int(self.values[0])
@@ -160,14 +163,16 @@ class GameRoleSelect(discord.ui.Select):
 
     def __init__(self, guild):
         roles = [r for r in guild.roles if not r.is_default()]
-        super().__init__(placeholder="🎮 Oyun destek rolleri",
-                         options=[
-                             discord.SelectOption(label=r.name,
-                                                  value=str(r.id))
-                             for r in roles
-                         ],
-                         min_values=1,
-                         max_values=len(roles))
+        super().__init__(
+            placeholder="🎮 Oyun destek rolleri",
+            options=[
+                discord.SelectOption(label=r.name, value=str(r.id))
+                for r in roles[:25]
+            ],
+            min_values=1,
+            max_values=25
+        )
+
 
     async def callback(self, interaction: discord.Interaction):
         SETTINGS["game_roles"] = list(map(int, self.values))
@@ -178,14 +183,16 @@ class DiscordRoleSelect(discord.ui.Select):
 
     def __init__(self, guild):
         roles = [r for r in guild.roles if not r.is_default()]
-        super().__init__(placeholder="💬 Discord destek rolleri",
-                         options=[
-                             discord.SelectOption(label=r.name,
-                                                  value=str(r.id))
-                             for r in roles
-                         ],
-                         min_values=1,
-                         max_values=len(roles))
+        super().__init__(
+            placeholder="💬 Discord destek rolleri",
+            options=[
+                discord.SelectOption(label=r.name, value=str(r.id))
+                for r in roles[:25]
+            ],
+            min_values=1,
+            max_values=25
+        )
+
 
     async def callback(self, interaction: discord.Interaction):
         SETTINGS["discord_roles"] = list(map(int, self.values))
@@ -263,3 +270,4 @@ def run_flask():
 Thread(target=run_flask).start()
 
 bot.run(TOKEN)
+
