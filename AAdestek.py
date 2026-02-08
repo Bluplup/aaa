@@ -1,8 +1,34 @@
+import os
 import discord
 from discord.ext import commands
-from discord import app_commands
-import os
-TOKEN = os.getenv("DISCORD_TOKEN")
+from flask import Flask
+from threading import Thread
+
+TOKEN = os.environ["DISCORD_TOKEN"]
+
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix="!", intents=intents)
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Bot ayakta"
+
+def run_flask():
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
+
+@bot.event
+async def on_ready():
+    print("Bot hazır")
+
+def start():
+    Thread(target=run_flask).start()
+    bot.run(TOKEN)
+
+start()
+
 
 
 intents = discord.Intents.all()
@@ -200,3 +226,4 @@ async def ticket_add(interaction: discord.Interaction, user: discord.Member):
     await interaction.response.send_message(f"{user.mention} ticket'e eklendi")
 
 bot.run(TOKEN)
+
