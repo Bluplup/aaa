@@ -78,18 +78,19 @@ class TicketSelect(discord.ui.Select):
         guild = interaction.guild
         category = guild.get_channel(SETTINGS["category"])
 
+        # kanal adı güvenli hâle getirildi
         if self.values[0] == "game":
             roles = [
                 guild.get_role(r) for r in SETTINGS["game_roles"]
                 if guild.get_role(r)
             ]
-            name = f"oyun-destek-{interaction.user.name}"
+            name = f"oyun-destek-{interaction.user.name}".lower().replace(" ", "-")
         else:
             roles = [
                 guild.get_role(r) for r in SETTINGS["discord_roles"]
                 if guild.get_role(r)
             ]
-            name = f"discord-destek-{interaction.user.name}"
+            name = f"discord-destek-{interaction.user.name}".lower().replace(" ", "-")
 
         overwrites = {
             guild.default_role:
@@ -137,7 +138,6 @@ class CategorySelect(discord.ui.Select):
             ]
         )
 
-
     async def callback(self, interaction: discord.Interaction):
         SETTINGS["category"] = int(self.values[0])
         await interaction.response.defer()
@@ -159,54 +159,41 @@ class LogSelect(discord.ui.Select):
         await interaction.response.defer()
 
 
-class GameRoleSelect(discord.ui.Select):
+# ================= GAME ROLE MODAL =================
+class GameRoleIDModal(discord.ui.Modal, title="🎮 Oyun Destek Rolleri ID"):
+    roles_input = discord.ui.TextInput(
+        label="Rol ID'leri (boşlukla ayırın)",
+        placeholder="123456789012345678 987654321098765432",
+        style=discord.TextStyle.short,
+        required=True
+    )
 
-    def __init__(self, guild):
-        roles = [r for r in guild.roles if not r.is_default()]
-        super().__init__(
-            placeholder="🎮 Oyun destek rolleri",
-            options=[
-                discord.SelectOption(label=r.name, value=str(r.id))
-                for r in roles[:25]
-            ],
-            min_values=1,
-            max_values=25
-        )
-
-
-    async def callback(self, interaction: discord.Interaction):
-        SETTINGS["game_roles"] = list(map(int, self.values))
-        await interaction.response.defer()
+    async def on_submit(self, interaction: discord.Interaction):
+        SETTINGS["game_roles"] = [int(rid) for rid in self.roles_input.value.split()]
+        await interaction.response.send_message("Oyun rolleri ayarlandı", ephemeral=True)
 
 
-class DiscordRoleSelect(discord.ui.Select):
+class DiscordRoleIDModal(discord.ui.Modal, title="💬 Discord Destek Rolleri ID"):
+    roles_input = discord.ui.TextInput(
+        label="Rol ID'leri (boşlukla ayırın)",
+        placeholder="123456789012345678 987654321098765432",
+        style=discord.TextStyle.short,
+        required=True
+    )
 
-    def __init__(self, guild):
-        roles = [r for r in guild.roles if not r.is_default()]
-        super().__init__(
-            placeholder="💬 Discord destek rolleri",
-            options=[
-                discord.SelectOption(label=r.name, value=str(r.id))
-                for r in roles[:25]
-            ],
-            min_values=1,
-            max_values=25
-        )
+    async def on_submit(self, interaction: discord.Interaction):
+        SETTINGS["discord_roles"] = [int(rid) for rid in self.roles_input.value.split()]
+        await interaction.response.send_message("Discord rolleri ayarlandı", ephemeral=True)
 
 
-    async def callback(self, interaction: discord.Interaction):
-        SETTINGS["discord_roles"] = list(map(int, self.values))
-        await interaction.response.defer()
-
-
+# ================= TICKET SETUP VIEW =================
 class TicketSetupView(discord.ui.View):
 
     def __init__(self, guild):
         super().__init__(timeout=300)
         self.add_item(CategorySelect(guild))
         self.add_item(LogSelect(guild))
-        self.add_item(GameRoleSelect(guild))
-        self.add_item(DiscordRoleSelect(guild))
+        # eskiden burda GameRoleSelect ve DiscordRoleSelect vardı, onları kaldırdım
 
 
 # ================= EVENTS =================
@@ -253,6 +240,19 @@ async def ticket_add(interaction: discord.Interaction, user: discord.Member):
     await interaction.response.send_message(f"{user.mention} ticket'e eklendi")
 
 
+# ================= COMMANDS TO OPEN ROLE MODALS =================
+@bot.tree.command(name="set-game-roles")
+@app_commands.checks.has_permissions(administrator=True)
+async def set_game_roles(interaction: discord.Interaction):
+    await interaction.response.send_modal(GameRoleIDModal())
+
+
+@bot.tree.command(name="set-discord-roles")
+@app_commands.checks.has_permissions(administrator=True)
+async def set_discord_roles(interaction: discord.Interaction):
+    await interaction.response.send_modal(DiscordRoleIDModal())
+
+
 # ================= FLASK (REPLIT PREVIEW İÇİN) =================
 app = Flask(__name__)
 
@@ -270,4 +270,3 @@ def run_flask():
 Thread(target=run_flask).start()
 
 bot.run(TOKEN)
-
