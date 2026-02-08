@@ -23,12 +23,11 @@ def run_flask():
 async def on_ready():
     print("Bot hazır")
 
-def start():
+def main():
     Thread(target=run_flask).start()
     bot.run(TOKEN)
 
-start()
-
+main()
 
 
 intents = discord.Intents.all()
@@ -226,4 +225,5 @@ async def ticket_add(interaction: discord.Interaction, user: discord.Member):
     await interaction.response.send_message(f"{user.mention} ticket'e eklendi")
 
 bot.run(TOKEN)
+
 
