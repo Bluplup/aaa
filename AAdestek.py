@@ -29,17 +29,39 @@ class PanelModal(discord.ui.Modal, title="Ticket Panel & Kurulum Ayarları"):
     panel_desc_input = discord.ui.TextInput(label="Panel Açıklaması", style=discord.TextStyle.paragraph, required=True, default=SETTINGS["panel_desc"])
     category_id_input = discord.ui.TextInput(label="Kategori ID", style=discord.TextStyle.short, required=True, placeholder="123456789012345678")
     log_id_input = discord.ui.TextInput(label="Log Kanal ID", style=discord.TextStyle.short, required=True, placeholder="123456789012345678")
-    game_roles_input = discord.ui.TextInput(label="Game Rolleri ID (boşlukla ayır)", style=discord.TextStyle.short, required=True, placeholder="123456789012345678 987654321098765432")
-    discord_roles_input = discord.ui.TextInput(label="Discord Rolleri ID (boşlukla ayır)", style=discord.TextStyle.short, required=True, placeholder="123456789012345678 987654321098765432")
 
     async def on_submit(self, interaction: discord.Interaction):
         SETTINGS["panel_title"] = self.panel_title_input.value
         SETTINGS["panel_desc"] = self.panel_desc_input.value
         SETTINGS["category"] = int(self.category_id_input.value)
         SETTINGS["log"] = int(self.log_id_input.value)
-        SETTINGS["game_roles"] = [int(rid) for rid in self.game_roles_input.value.split()]
-        SETTINGS["discord_roles"] = [int(rid) for rid in self.discord_roles_input.value.split()]
-        await interaction.response.send_message("Kurulum ve panel ayarları kaydedildi.", ephemeral=True)
+        await interaction.response.send_message("Panel ve kurulum ayarları kaydedildi.", ephemeral=True)
+
+# ================= GAME ROLE MODAL =================
+class GameRoleIDModal(discord.ui.Modal, title="🎮 Oyun Destek Rolleri ID"):
+    roles_input = discord.ui.TextInput(
+        label="Rol ID'leri (boşlukla ayırın)",
+        style=discord.TextStyle.short,
+        required=True,
+        placeholder="123456789012345678 987654321098765432"
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        SETTINGS["game_roles"] = [int(rid) for rid in self.roles_input.value.split()]
+        await interaction.response.send_message("Oyun rolleri ayarlandı.", ephemeral=True)
+
+# ================= DISCORD ROLE MODAL =================
+class DiscordRoleIDModal(discord.ui.Modal, title="💬 Discord Destek Rolleri ID"):
+    roles_input = discord.ui.TextInput(
+        label="Rol ID'leri (boşlukla ayırın)",
+        style=discord.TextStyle.short,
+        required=True,
+        placeholder="123456789012345678 987654321098765432"
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        SETTINGS["discord_roles"] = [int(rid) for rid in self.roles_input.value.split()]
+        await interaction.response.send_message("Discord rolleri ayarlandı.", ephemeral=True)
 
 # ================= BUTTONS =================
 class TicketButtons(discord.ui.View):
@@ -108,6 +130,16 @@ async def on_ready():
 @app_commands.checks.has_permissions(administrator=True)
 async def ticket_modal(interaction: discord.Interaction):
     await interaction.response.send_modal(PanelModal())
+
+@bot.tree.command(name="ticket-set-game-roles")
+@app_commands.checks.has_permissions(administrator=True)
+async def set_game_roles(interaction: discord.Interaction):
+    await interaction.response.send_modal(GameRoleIDModal())
+
+@bot.tree.command(name="ticket-set-discord-roles")
+@app_commands.checks.has_permissions(administrator=True)
+async def set_discord_roles(interaction: discord.Interaction):
+    await interaction.response.send_modal(DiscordRoleIDModal())
 
 @bot.tree.command(name="ticket-panel")
 @app_commands.checks.has_permissions(administrator=True)
